@@ -1,0 +1,432 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import {
+  Brain, Zap, ShieldCheck, AlertCircle, TrendingUp, DollarSign, 
+  Package, FileSpreadsheet, Sparkles, RefreshCw, X, CheckCircle2, 
+  Info, ArrowUpRight, Menu, Home, BarChart3, Boxes, Star, FileText, ArrowDownToLine, Settings
+} from 'lucide-react';
+import {
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Area, AreaChart
+} from 'recharts';
+
+// Importação dos geradores de documentos PDF
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
+interface AuditLogItem {
+  id: string;
+  sku: string;
+  erp: number;
+  mkt: number;
+  failure: string;
+  status: string;
+}
+
+interface ToastMessage {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
+const historicalMetrics = [
+  { name: 'Jan', vendas: 3800, erros: 180 },
+  { name: 'Fev', vendas: 4200, erros: 210 },
+  { name: 'Mar', vendas: 5900, erros: 110 },
+  { name: 'Abr', vendas: 6100, erros: 95  },
+  { name: 'Mai', vendas: 7500, erros: 42  },
+];
+
+const mockInitialData: AuditLogItem[] = [
+  { id: '1', sku: 'ENV-102', erp: 50, mkt: 42, failure: 'Quebra de Estoque Físico', status: 'CRITICAL' },
+  { id: '2', sku: 'ENV-309', erp: 15, mkt: 0, failure: 'SKU Ausente na API', status: 'CRITICAL' },
+  { id: '3', sku: 'ENV-505', erp: 12, mkt: 12, failure: 'Nenhuma', status: 'OK' }
+];
+
+const FormattedInsight = ({ text }: { text: string }) => {
+  if (!text) {
+    return <span className="text-neutral-500 font-medium">Aguardando comando de varredura para emitir o diagnóstico operacional.</span>;
+  }
+
+  const lines = text.split('\n');
+  return (
+    <div className="space-y-3.5 text-[11px] font-normal tracking-wide leading-relaxed text-neutral-300">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('##')) {
+          return (
+            <h4 key={idx} className="text-xs font-bold text-purple-300 mt-4 first:mt-0 flex items-center gap-1.5 border-b border-purple-900/20 pb-1">
+              <Sparkles className="w-3 h-3 text-purple-400 shrink-0" />
+              {trimmed.replace('##', '').trim()}
+            </h4>
+          );
+        }
+        if (trimmed.startsWith('*')) {
+          return (
+            <div key={idx} className="flex items-start gap-2 bg-neutral-900/30 p-2.5 rounded-lg border border-neutral-800/20 hover:border-neutral-800/40 transition-all">
+              <span className="w-1 h-1 rounded-full bg-purple-500 mt-1.5 shrink-0 animate-pulse" />
+              <p className="flex-1">{trimmed.replace('*', '').trim()}</p>
+            </div>
+          );
+        }
+        if (trimmed) {
+          return <p key={idx} className="text-neutral-400 leading-relaxed">{trimmed}</p>;
+        }
+        return null;
+      })}
+    </div>
+  );
+};
+
+export default function CompleteDashboard() {
+  const [analysis, setAnalysis] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sheetLoading, setSheetLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [auditData, setAuditData] = useState<AuditLogItem[]>([]);
+  const [fetchingData, setFetchingData] = useState(true);
+  const [apiError, setApiError] = useState("");
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [activeTab, setActiveTab] = useState('home');
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const addToast = (message: string, type: 'success' | 'error' | 'info') => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  useEffect(() => {
+    setFetchingData(true);
+    fetch('/api/audit-logs')
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          setAuditData(result.data || []);
+        } else {
+          setApiError(result.details || result.error);
+          setAuditData(mockInitialData);
+          addToast("Carregado em modo de simulação com dados locais.", "info");
+        }
+      })
+      .catch(() => {
+        setApiError("Não foi possível conectar ao servidor.");
+        setAuditData(mockInitialData);
+        addToast("Modo de simulação ativo (Offline).", "info");
+      })
+      .finally(() => setFetchingData(false));
+  }, []);
+
+  const exportToSheets = async () => {
+    setSheetLoading(true);
+    try {
+      const res = await fetch('/api/sheets', { method: 'POST' });
+      const result = await res.json();
+      if (result.success) {
+        addToast(`${result.count} registros sincronizados no Google Sheets.`, "success");
+      } else {
+        addToast(`Erro ao exportar planilha: ${result.error}`, "error");
+      }
+    } catch {
+      setTimeout(() => {
+        addToast("Sincronização simulada: 3 logs integrados com sucesso!", "success");
+        setSheetLoading(false);
+      }, 1000);
+    } finally {
+      setSheetLoading(false);
+    }
+  };
+
+  // INTEGRACAO: Função sênior para compilar e baixar o relatório em PDF
+  const exportToPDF = () => {
+    if (auditData.length === 0) return;
+    setPdfLoading(true);
+
+    try {
+      const doc = new jsPDF();
+      
+      // Cabeçalho estilizado do PDF corporativo
+      doc.setFillColor(7, 7, 10);
+      doc.rect(0, 0, 220, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(18);
+      doc.setFont('Helvetica', 'bold');
+      doc.text('DASHBOARD AI ENVIAGORA', 14, 18);
+      
+      doc.setTextColor(16, 185, 129);
+      doc.setFontSize(9);
+      doc.text('RELATÓRIO CORPORATIVO DE AUDITORIA DE ESTOQUE', 14, 26);
+      
+      doc.setTextColor(156, 163, 175);
+      doc.text(`EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}`, 150, 26);
+
+      // Linhas da tabela de SKUs extraídas do estado reativo ativo
+      const tableRows = auditData.map(log => [
+        log.sku,
+        `${log.erp} un`,
+        `${log.mkt} un`,
+        log.failure,
+        log.status
+      ]);
+
+      autoTable(doc, {
+        startY: 48,
+        head: [['Código SKU', 'Estoque Físico ERP', 'Canais Marketplace', 'Natureza da Divergência', 'Status']],
+        body: tableRows,
+        theme: 'striped',
+        headStyles: { fillColor: [12, 12, 17], textColor: [255, 255, 255], fontSize: 9, fontStyle: 'bold' },
+        bodyStyles: { fontSize: 8, textColor: [40, 40, 40] },
+        columnStyles: { 4: { fontStyle: 'bold' } },
+      });
+
+      // Efetua o download físico do arquivo no navegador do supervisor
+      doc.save(`auditoria-estoque-${new Date().toISOString().split('T')[0]}.pdf`);
+      addToast("Relatório PDF baixado com sucesso.", "success");
+    } catch (error) {
+      addToast("Falha ao gerar arquivo PDF de auditoria.", "error");
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  const runAnalysis = async () => {
+    setLoading(true);
+    setAnalysis("");
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+    try {
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataset: auditData }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      const output = await res.json();
+      setAnalysis(output.analysis);
+      addToast("Auditoria completada pelo James AI.", "success");
+    } catch {
+      clearTimeout(timeoutId);
+      setTimeout(() => {
+        setAnalysis("## Diagnóstico Operacional de Estoques\nConcluímos a avaliação do inventário ativo...\n\n* **ENV-102**: Divergência detectada...");
+        addToast("Simulação de análise de IA carregada com sucesso.", "success");
+        setLoading(false);
+      }, 500);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const criticalCount = auditData.filter(d => d.status === 'CRITICAL').length;
+  const isDisabled = loading || fetchingData || auditData.length === 0;
+
+  return (
+    <div className="flex min-h-screen bg-[#07070a] text-neutral-100 font-sans antialiased selection:bg-purple-500/20 selection:text-purple-300 relative overflow-hidden">
+      
+      <aside className={`hidden sm:flex flex-col justify-between py-6 bg-[#0c0c11]/90 backdrop-blur-xl border-r border-neutral-900/60 shrink-0 z-30 sticky top-0 h-screen transition-all duration-300 ${isExpanded ? 'w-60 px-4' : 'w-20 px-2'}`}>
+        <div className="flex flex-col gap-9 w-full">
+          <button onClick={() => setIsExpanded(!isExpanded)} className={`p-2.5 text-neutral-500 hover:text-neutral-200 transition-colors rounded-xl hover:bg-neutral-900/40 cursor-pointer flex items-center ${isExpanded ? 'justify-start px-4 gap-4' : 'justify-center'}`}>
+            <Menu size={18} />
+            {isExpanded && <span className="text-xs font-bold tracking-wider text-neutral-400">Recolher Menu</span>}
+          </button>
+          <nav className="flex flex-col gap-4.5 w-full">
+            {[
+              { id: 'home', icon: Home, label: 'Dashboard Base' },
+              { id: 'analytics', icon: BarChart3, label: 'Métricas & Análises' },
+              { id: 'inventory', icon: Boxes, label: 'Controle de SKUs' },
+              { id: 'favorites', icon: Star, label: 'Produtos Favoritos' },
+              { id: 'logs', icon: FileText, label: 'Histórico de Logs' },
+              { id: 'downloads', icon: ArrowDownToLine, label: 'Relatórios Exportados' },
+            ].map((tab) => {
+              const IconComponent = tab.icon;
+              const isSelected = activeTab === tab.id;
+              return (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)} title={!isExpanded ? tab.label : ""} className={`w-full p-3 rounded-xl transition-all duration-300 relative group flex items-center cursor-pointer ${isExpanded ? 'justify-start gap-4 px-4' : 'justify-center'} ${isSelected ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'text-neutral-500 hover:text-neutral-200 hover:bg-neutral-900/30 border border-transparent'}`}>
+                  <IconComponent size={18} className="transition-transform duration-300 group-hover:scale-105 shrink-0" />
+                  <span className={`text-xs font-semibold tracking-wide whitespace-nowrap transition-all duration-200 ${isExpanded ? 'opacity-100 max-w-xs visible' : 'opacity-0 max-w-0 invisible overflow-hidden'}`}>{tab.label}</span>
+                  {isSelected && <span className="absolute left-0 w-1 h-5 bg-emerald-400 rounded-r-full" />}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+        <button onClick={() => setActiveTab('settings')} className={`w-full p-3 rounded-xl transition-all duration-300 flex items-center cursor-pointer ${isExpanded ? 'justify-start gap-4 px-4' : 'justify-center'} ${activeTab === 'settings' ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' : 'text-neutral-500 hover:text-neutral-200 hover:bg-neutral-900/30'}`} title={!isExpanded ? "Configurações do Painel" : ""}>
+          <Settings size={18} className="shrink-0" />
+          <span className={`text-xs font-semibold tracking-wide whitespace-nowrap transition-all duration-200 ${isExpanded ? 'opacity-100 max-w-xs visible' : 'opacity-0 max-w-0 invisible overflow-hidden'}`}>Configurações</span>
+        </button>
+      </aside>
+
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 relative">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/10 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-900/10 blur-[120px] pointer-events-none" />
+
+        <div className="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+          {toasts.map((t) => (
+            <div key={t.id} className="pointer-events-auto flex items-start gap-3 bg-neutral-900/90 border border-neutral-800/60 backdrop-blur-xl p-4 rounded-xl shadow-2xl shadow-black/80 animate-slide-in">
+              {t.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />}
+              {t.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />}
+              {t.type === 'info' && <Info className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />}
+              <div className="flex-1"><p className="text-xs font-semibold text-neutral-200">Notificação do System</p><p className="text-[11px] text-neutral-400 mt-1 leading-normal">{t.message}</p></div>
+              <button onClick={() => removeToast(t.id)} className="text-neutral-500 hover:text-neutral-300 transition-colors p-0.5 rounded"><X className="w-3.5 h-3.5" /></button>
+            </div>
+          ))}
+        </div>
+
+        <header className="relative flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8 border-b border-neutral-900 pb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /><span className="text-[9px] uppercase font-bold tracking-[0.2em] text-emerald-400">Sistema de Sincronização Ativa</span></div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-neutral-50 via-neutral-200 to-neutral-400 bg-clip-text text-transparent">dashboard-ai-enviagora</h1>
+            <p className="text-xs text-neutral-500 mt-1.5 font-medium">Painel Corporativo de Auditoria Operacional <span className="mx-2 text-neutral-800">•</span> <span className="bg-neutral-900/60 px-2 py-0.5 rounded text-[10px] text-neutral-400 border border-neutral-800/85">Prisma Engine v2.4</span></p>
+          </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            {/* Botão de Planilha Existente Mantido */}
+            <button
+              onClick={exportToSheets}
+              disabled={sheetLoading || fetchingData || auditData.length === 0}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-neutral-900/60 hover:bg-neutral-800/80 border border-neutral-800/60 hover:border-neutral-700/80 text-neutral-200 px-4 h-10 rounded-lg text-xs font-semibold transition-all active:scale-[0.98] disabled:opacity-35 disabled:pointer-events-none whitespace-nowrap"
+            >
+              {sheetLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin text-neutral-400" /> : <FileSpreadsheet className="w-3.5 h-3.5 text-neutral-400" />}
+              {sheetLoading ? "Sincronizando..." : "Exportar Planilha"}
+            </button>
+
+            {/* INTEGRACAO: Novo Botão de Baixar PDF para o Supervisor */}
+            <button
+              onClick={exportToPDF}
+              disabled={pdfLoading || fetchingData || auditData.length === 0}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-100 px-4 h-10 rounded-lg text-xs font-bold transition-all active:scale-[0.98] disabled:opacity-35 disabled:pointer-events-none whitespace-nowrap"
+            >
+              {pdfLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5 text-zinc-400" />}
+              {pdfLoading ? "Gerando..." : "Baixar PDF"}
+            </button>
+
+            <button
+              onClick={runAnalysis}
+              disabled={isDisabled}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-neutral-950 px-5 h-10 rounded-lg text-xs font-bold transition-all active:scale-[0.98] disabled:from-neutral-900 disabled:to-neutral-900 disabled:text-neutral-600 disabled:border disabled:border-neutral-800/80 disabled:opacity-50 whitespace-nowrap shadow-lg shadow-emerald-500/5 hover:shadow-emerald-500/15"
+            >
+              {loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 fill-current" />}
+              {loading ? "Processando..." : "Disparar Análise"}
+            </button>
+          </div>
+        </header>
+
+        {activeTab === 'home' ? (
+          <>
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+              <div className="bg-[#0c0c11]/85 backdrop-blur-md border border-neutral-900/60 rounded-xl p-5 flex justify-between items-center transition-all duration-300 hover:border-neutral-800/80 hover:translate-y-[-2px] hover:shadow-lg hover:shadow-black/20 group">
+                <div><p className="text-[9px] text-neutral-500 uppercase tracking-widest font-bold mb-1">Receita Monitorada</p><p className="text-xl font-extrabold tracking-tight text-neutral-50 bg-gradient-to-r from-white to-neutral-300 bg-clip-text">R$ 145.230</p><span className="text-[9px] text-emerald-400 flex items-center gap-0.5 mt-1 font-medium"><ArrowUpRight className="w-2.5 h-2.5" /> +12.3% este mês</span></div>
+                <div className="p-3 bg-neutral-900/80 rounded-lg border border-neutral-800/40 group-hover:border-emerald-500/25 group-hover:bg-emerald-950/10 transition-all duration-300"><DollarSign className="text-emerald-400 transition-transform duration-300 group-hover:scale-110" size={16} /></div>
+              </div>
+              <div className={`bg-[#0c0c11]/85 backdrop-blur-md border rounded-xl p-5 flex justify-between items-center transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg hover:shadow-black/20 group ${criticalCount > 0 ? 'border-rose-950/30 hover:border-rose-800/40' : 'border-neutral-900/60 hover:border-neutral-800/80'}`}>
+                <div><p className="text-[9px] text-neutral-500 uppercase tracking-widest font-bold mb-1">Alertas Ativos</p><p className={`text-xl font-extrabold tracking-tight ${criticalCount > 0 ? 'text-rose-400 animate-pulse' : 'text-neutral-400'}`}>{fetchingData ? <span className="inline-block w-12 h-5 bg-neutral-900/60 animate-pulse rounded" /> : `${criticalCount} Críticos`}</p><span className={`text-[9px] flex items-center gap-1 mt-1 ${criticalCount > 0 ? 'text-rose-400/80' : 'text-neutral-500'}`}><AlertCircle className="w-2.5 h-2.5" /> Ações de ajuste recomendadas</span></div>
+                <div className={`p-3 rounded-lg border transition-all duration-300 ${criticalCount > 0 ? 'bg-rose-950/10 border-rose-900/30' : 'bg-neutral-900/80 border-neutral-800/40'}`}><AlertCircle className={`transition-transform duration-300 group-hover:scale-110 ${criticalCount > 0 ? 'text-rose-400' : 'text-neutral-500'}`} size={16} /></div>
+              </div>
+              <div className="bg-[#0c0c11]/85 backdrop-blur-md border border-neutral-900/60 rounded-xl p-5 flex justify-between items-center transition-all duration-300 hover:border-neutral-800/80 hover:translate-y-[-2px] hover:shadow-lg hover:shadow-black/20 group">
+                <div><p className="text-[9px] text-neutral-500 uppercase tracking-widest font-bold mb-1">Acurácia Geral</p><p className="text-xl font-extrabold tracking-tight text-emerald-400">98.4%</p><span className="text-[9px] text-neutral-500 flex items-center gap-1 mt-1"><ShieldCheck className="w-2.5 h-2.5 text-teal-400" /> Meta corporativa de SLA ativa</span></div>
+                <div className="p-3 bg-neutral-900/80 rounded-lg border border-neutral-800/40 group-hover:border-teal-500/25 group-hover:bg-teal-950/10 transition-all duration-300"><ShieldCheck className="text-teal-400 transition-transform duration-300 group-hover:scale-110" size={16} /></div>
+              </div>
+            </section>
+
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="lg:col-span-2 bg-[#0c0c11]/80 backdrop-blur-md border border-neutral-900/60 rounded-xl p-6 flex flex-col justify-between shadow-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-2"><TrendingUp size={14} className="text-neutral-500" /> Tendência Logística Mensal</p>
+                  <div className="flex items-center gap-4 text-[10px] font-semibold text-neutral-400"><span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Vendas</span><span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Erros Sinc.</span></div>
+                </div>
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={historicalMetrics}>
+                      <defs>
+                        <linearGradient id="vendasGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.12}/><stop offset="95%" stopColor="#10b981" stopOpacity={0}/></linearGradient>
+                        <linearGradient id="errosGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.12}/><stop offset="95%" stopColor="#ef4444" stopOpacity={0}/></linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#161622" />
+                      <XAxis dataKey="name" stroke="#4b5563" fontSize={10} tickLine={false} axisLine={false} dy={10} />
+                      <YAxis stroke="#4b5563" fontSize={10} tickLine={false} axisLine={false} dx={-10} />
+                      <Tooltip contentStyle={{ backgroundColor: '#0a0a0f', borderColor: '#1e1e2d', borderRadius: '8px', fontSize: 11, color: '#e5e5e5', backdropFilter: 'blur(8px)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)' }} />
+                      <Area type="monotone" dataKey="vendas" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#vendasGrad)" />
+                      <Area type="monotone" dataKey="erros" stroke="#ef4444" strokeWidth={1.5} fillOpacity={1} fill="url(#errosGrad)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="bg-[#0c0c11]/80 backdrop-blur-md border border-neutral-900/60 rounded-xl p-6 flex flex-col justify-between shadow-lg relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center justify-between mb-4"><p className="text-xs font-bold text-purple-400 uppercase tracking-widest flex items-center gap-2"><Brain size={14} className="text-purple-500 animate-pulse" /> James AI Insight</p><span className="text-[9px] bg-purple-950/20 text-purple-400 border border-purple-900/20 px-2 py-0.5 rounded font-mono">Auto-Scan Ativo</span></div>
+                <div className="h-64 bg-[#050508]/80 rounded-lg p-4 text-neutral-300 overflow-y-auto custom-scrollbar relative border border-neutral-900/30">
+                  {loading ? (
+                    <div className="flex flex-col items-center justify-center h-full gap-3 text-neutral-500"><div className="relative flex items-center justify-center"><div className="w-8 h-8 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div><Brain className="w-3.5 h-3.5 text-purple-400 absolute" /></div><div className="text-center"><p className="text-[10px] font-mono text-neutral-400">Processando Logs Operacionais</p></div></div>
+                  ) : ( <FormattedInsight text={analysis} /> )}
+                </div>
+              </div>
+            </section>
+
+            <section className="bg-[#0c0c11]/80 backdrop-blur-md border border-neutral-900/60 rounded-xl p-6 shadow-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-neutral-900 pb-4">
+                <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-2"><Package size={14} className="text-neutral-500" /> SKUs Auditados em Tempo Real</p>
+                <div className="flex items-center gap-2 text-[10px] text-neutral-500 font-medium"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />Sincronizado com o Banco SQLite Local</div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="text-neutral-500 uppercase text-[9px] tracking-wider font-bold">
+                      <th className="pb-3 px-4 font-semibold">Código SKU</th>
+                      <th className="pb-3 px-4 font-semibold">Estoque Físico ERP</th>
+                      <th className="pb-3 px-4 font-semibold">Canais Marketplace</th>
+                      <th className="pb-3 px-4 font-semibold">Natureza da Divergência</th>
+                      <th className="pb-3 px-4 font-semibold text-right">Status de Integridade</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-900/60">
+                    {fetchingData ? (
+                      <tr><td colSpan={5} className="py-12"><div className="flex flex-col items-center justify-center gap-2 text-neutral-500 font-mono text-[11px]"><RefreshCw className="w-4 h-4 animate-spin text-neutral-600" /><span>Consultando tabelas locais...</span></div></td></tr>
+                    ) : apiError && auditData.length === 0 ? (
+                      <tr><td colSpan={5} className="text-center py-12 text-rose-400/90 font-medium"><AlertCircle size={14} className="inline mr-2 text-rose-500" />{apiError}</td></tr>
+                    ) : auditData.map(log => (
+                      <tr key={log.id} className="hover:bg-neutral-900/20 transition-all duration-150 group">
+                        <td className="py-4 px-4 font-mono text-emerald-400 font-bold tracking-wide group-hover:text-emerald-300">{log.sku}</td>
+                        <td className="py-4 px-4 text-neutral-300 font-medium">{log.erp} un</td>
+                        <td className="py-4 px-4 text-neutral-300 font-medium">{log.mkt} un</td>
+                        <td className="py-4 px-4 text-neutral-400 font-normal">{log.failure}</td>
+                        <td className="py-4 px-4 text-right">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wide border ${log.status === 'CRITICAL' ? 'bg-rose-950/20 border-rose-900/30 text-rose-400' : 'bg-emerald-950/20 border-emerald-900/30 text-emerald-400'}`}><span className={`w-1 h-1 rounded-full ${log.status === 'CRITICAL' ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />{log.status}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </>
+        ) : (
+          <section className="bg-[#0c0c11]/80 backdrop-blur-md border border-neutral-900/60 rounded-xl p-12 text-center shadow-lg">
+            <Info className="w-8 h-8 text-neutral-600 mx-auto mb-3" />
+            <h3 className="text-sm font-bold text-neutral-300 uppercase tracking-wider">Módulo em Desenvolvimento</h3>
+            <p className="text-xs text-neutral-500 mt-1 max-w-xs mx-auto">A aba "{activeTab}" está reservada para as futuras automações de rotas e conexões integradas do sistema.</p>
+            <button onClick={() => setActiveTab('home')} className="mt-4 text-xs font-semibold text-emerald-400 hover:text-emerald-300 underline cursor-pointer">Voltar para o Painel Principal</button>
+          </section>
+        )}
+      </div>
+
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.15); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.15); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.3); }
+        @keyframes slide-in { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-slide-in { animation: slide-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      `}</style>
+    </div>
+  );
+}

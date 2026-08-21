@@ -1,26 +1,16 @@
+/* app/globals.css */
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* O novo formato centralizado de configuração de temas do Tailwind v4 */
+@theme {
+  --color-neon-emerald: #10b981;
+  --color-neon-purple: #a855f7;
+  --color-dark-glass: rgba(10, 10, 10, 0.45);
+  
+  --animate-glow-pulse: glowPulse 2s infinite alternate;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes glowPulse {
+  from { filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.2)); }
+  to { filter: drop-shadow(0 0 16px rgba(16, 185, 129, 0.5)); }
 }

@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0A1A2F">
+    <title>Akamine &amp; Associados | Advocacia e Assessoria Jurídica em Bragança Paulista</title>
+    <meta name="description" content="Escritório de advocacia premium em Bragança Paulista. Atuação em direito cível, trabalhista, empresarial, previdenciário e tributário. Consulta inicial gratuita.">
+    <meta name="author" content="Akamine Web Studio">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Akamine &amp; Associados | Advocacia e Assessoria Jurídica">
+    <meta property="og:description" content="Há mais de 15 anos defendendo seus direitos com ética, técnica e resultados. Consulta inicial gratuita.">
+    <meta property="og:locale" content="pt_BR">
+
+    <!-- Performance: preconnect to font + image CDNs -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://images.pexels.com" crossorigin>
+    <link rel="dns-prefetch" href="https://unpkg.com">
+
+    <!-- Google Fonts (max 2): Fraunces (display serif) + Inter (UI/body) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: {
+                            50:  '#f3f6fa',
+                            100: '#e3eaf3',
+                            200: '#c3d2e4',
+                            300: '#94afce',
+                            400: '#5e84b0',
+                            500: '#3e6495',
+                            600: '#2f4d78',
+                            700: '#283f61',
+                            800: '#1b2c45',
+                            900: '#0f1d33',
+                            950: '#0a1626',
+                        },
+                        gold: {
+                            50:  '#fbf8f0',
+                            100: '#f5ecd6',
+                            200: '#ebd6a8',
+                            300: '#ddbd74',
+                            400: '#cfa54e',
+                            500: '#c08f3c',
+                            600: '#a17231',
+                            700: '#80572b',
+                            800: '#5f4121',
+                            900: '#3f2c16',
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Fraunces', 'Georgia', 'serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft':  '0 1px 2px rgba(10,22,38,.04), 0 8px 24px -8px rgba(10,22,38,.12)',
+                        'lift':  '0 24px 48px -16px rgba(10,22,38,.28)',
+                        'glow':  '0 0 0 1px rgba(207,165,78,.25), 0 18px 40px -12px rgba(207,165,78,.35)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --ink: #0a1626;
+            --gold: #cfa54e;
+            --ease: cubic-bezier(.22, 1, .36, 1);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: #fbfaf7;
+            color: #1b2c45;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; }
+
+        /* ---- Fluid typography helpers ---- */
+        .fluid-display { font-size: clamp(2.5rem, 1.6rem + 4.4vw, 5rem); line-height: 1.04; letter-spacing: -.02em; }
+        .fluid-h2      { font-size: clamp(2rem, 1.4rem + 2.4vw, 3.25rem); line-height: 1.1; letter-spacing: -.015em; }
+        .fluid-lead    { font-size: clamp(1.05rem, .98rem + .45vw, 1.3rem); }
+
+        /* ---- Selection + scrollbar ---- */
+        ::selection { background: var(--gold); color: #0a1626; }
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #eef1f6; }
+        ::-webkit-scrollbar-thumb { background: #2f4d78; border-radius: 8px; border: 2px solid #eef1f6; }
+        ::-webkit-scrollbar-thumb:hover { background: #0f1d33; }
+
+        /* ---- Skip link ---- */
+        .skip-link {
+            position: fixed; top: 0; left: 50%; transform: translate(-50%, -120%);
+            z-index: 100; background: var(--ink); color: #fff; padding: .75rem 1.5rem;
+            border-radius: 0 0 .75rem .75rem; font-weight: 600; transition: transform .25s var(--ease);
+        }
+        .skip-link:focus { transform: translate(-50%, 0); }
+
+        /* ---- Global focus-visible ---- */
+        a:focus-visible, button:focus-visible, input:focus-visible,
+        select:focus-visible, textarea:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
+        /* ---- Gradient gold text ---- */
+        .text-gradient-gold {
+            background: linear-gradient(135deg, #ddbd74 0%, #cfa54e 45%, #a17231 100%);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent; color: transparent;
+        }
+
+        /* ---- Hero layered background ---- */
+        .hero-photo {
+            background-image: url('https://images.pexels.com/photos/5668473/pexels-photo-5668473.jpeg?auto=compress&cs=tinysrgb&w=1920');
+            background-size: cover; background-position: center;
+            will-change: transform;
+        }
+        .hero-overlay {
+            background:
+                radial-gradient(120% 90% at 20% 10%, rgba(15,29,51,.55) 0%, rgba(10,22,38,.92) 60%, rgba(8,16,26,.97) 100%),
+                linear-gradient(180deg, rgba(10,22,38,.35) 0%, rgba(10,22,38,.85) 100%);
+        }
+        .grain {
+            background-image: radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
+            background-size: 4px 4px;
+        }
+
+        /* ---- Glass surfaces ---- */
+        .glass {
+            background: rgba(255,255,255,.08);
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1px solid rgba(255,255,255,.16);
+        }
+        .glass-light {
+            background: rgba(255,255,255,.72);
+            backdrop-filter: blur(16px) saturate(150%);
+            -webkit-backdrop-filter: blur(16px) saturate(150%);
+            border: 1px solid rgba(255,255,255,.6);
+        }
+
+        /* ---- Navbar states ---- */
+        #navbar { transition: background-color .4s var(--ease), padding .4s var(--ease), box-shadow .4s var(--ease), border-color .4s var(--ease); }
+        #navbar.scrolled {
+            background: rgba(251,250,247,.85);
+            backdrop-filter: blur(16px) saturate(150%);
+            -webkit-backdrop-filter: blur(16px) saturate(150%);
+            box-shadow: 0 1px 0 rgba(10,22,38,.06), 0 12px 30px -18px rgba(10,22,38,.4);
+            border-bottom: 1px solid rgba(10,22,38,.06);
+        }
+        #navbar.scrolled .nav-link { color: #283f61; }
+        #navbar.scrolled .nav-link:hover { color: #0f1d33; }
+        #navbar.scrolled .nav-logo-title { color: #0f1d33; }
+        #navbar.scrolled .nav-logo-sub { color: #5e84b0; }
+        #navbar.scrolled .nav-burger span { background: #0f1d33; }
+
+        .nav-underline { position: relative; }
+        .nav-underline::after {
+            content: ''; position: absolute; left: 0; bottom: -6px; height: 2px; width: 0;
+            background: linear-gradient(90deg, #ddbd74, #a17231);
+            transition: width .35s var(--ease);
+        }
+        .nav-underline:hover::after, .nav-underline:focus-visible::after { width: 100%; }
+
+        /* ---- Animated hamburger ---- */
+        .nav-burger { width: 28px; height: 20px; position: relative; display: inline-block; }
+        .nav-burger span {
+            position: absolute; left: 0; height: 2px; width: 100%; background: #fff; border-radius: 2px;
+            transition: transform .35s var(--ease), opacity .25s var(--ease), top .35s var(--ease), width .35s var(--ease);
+        }
+        .nav-burger span:nth-child(1) { top: 0; }
+        .nav-burger span:nth-child(2) { top: 9px; }
+        .nav-burger span:nth-child(3) { top: 18px; }
+        .nav-burger.is-open span { background: #0f1d33; }
+        .nav-burger.is-open span:nth-child(1) { top: 9px; transform: rotate(45deg); }
+        .nav-burger.is-open span:nth-child(2) { opacity: 0; width: 0; }
+        .nav-burger.is-open span:nth-child(3) { top: 9px; transform: rotate(-45deg); }
+
+        /* ---- Mobile drawer ---- */
+        .drawer { transform: translateX(100%); transition: transform .45s var(--ease); }
+        .drawer.open { transform: translateX(0); }
+        .drawer-backdrop { opacity: 0; pointer-events: none; transition: opacity .4s var(--ease); }
+        .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+        .drawer-link { opacity: 0; transform: translateX(24px); transition: opacity .4s var(--ease), transform .4s var(--ease); }
+        .drawer.open .drawer-link { opacity: 1; transform: translateX(0); }
+        .drawer.open .drawer-link:nth-child(1) { transition-delay: .08s; }
+        .drawer.open .drawer-link:nth-child(2) { transition-delay: .14s; }
+        .drawer.open .drawer-link:nth-child(3) { transition-delay: .2s; }
+        .drawer.open .drawer-link:nth-child(4) { transition-delay: .26s; }
+        .drawer.open .drawer-link:nth-child(5) { transition-delay: .32s; }
+
+        /* ---- Buttons ---- */
+        .btn { transition: transform .3s var(--ease), box-shadow .3s var(--ease), background-color .3s var(--ease), color .3s var(--ease); will-change: transform; }
+        .btn-gold {
+            background: linear-gradient(135deg, #ddbd74 0%, #cfa54e 50%, #a17231 100%);
+            color: #0a1626;
+        }
+        .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 18px 36px -12px rgba(207,165,78,.55); }
+        .btn-gold:active { transform: translateY(-1px); }
+        .btn-ghost { border: 1px solid rgba(255,255,255,.35); color: #fff; }
+        .btn-ghost:hover { transform: translateY(-3px); background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.6); }
+
+        /* ---- Divider ---- */
+        .rule {
+            height: 2px; width: 56px; border-radius: 4px;
+            background: linear-gradient(90deg, #cfa54e, #80572b);
+        }
+
+        /* ---- Service cards ---- */
+        .card {
+            transition: transform .5s var(--ease), box-shadow .5s var(--ease), border-color .5s var(--ease);
+            will-change: transform;
+        }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 30px 60px -24px rgba(10,22,38,.35); border-color: rgba(207,165,78,.5); }
+        .card:hover .card-icon { background: linear-gradient(135deg,#cfa54e,#a17231); color:#fff; transform: rotate(-6deg) scale(1.06); }
+        .card-icon { transition: transform .5s var(--ease), background-color .5s var(--ease), color .5s var(--ease); }
+
+        /* ---- Feature row hover ---- */
+        .feat-icon { transition: transform .4s var(--ease), background-color .4s var(--ease), color .4s var(--ease); }
+        .group:hover .feat-icon { transform: translateY(-2px) scale(1.05); }
+
+        /* ---- Image reveal zoom ---- */
+        .img-zoom { overflow: hidden; }
+        .img-zoom img { transition: transform .8s var(--ease); will-change: transform; }
+        .img-zoom:hover img { transform: scale(1.06); }
+
+        /* ---- Inputs ---- */
+        .field {
+            transition: border-color .3s var(--ease), box-shadow .3s var(--ease), background-color .3s var(--ease);
+        }
+        .field:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 4px rgba(207,165,78,.18);
+            background: rgba(255,255,255,.14);
+            outline: none;
+        }
+
+        /* ---- Float / ambient motion ---- */
+        @keyframes floaty { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-22px) } }
+        .floaty { animation: floaty 9s ease-in-out infinite; }
+        @keyframes nudge { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(8px) } }
+        .nudge { animation: nudge 2.2s ease-in-out infinite; }
+
+        /* ---- Scroll reveal engine ---- */
+        [data-reveal] {
+            opacity: 0;
+            transform: translateY(34px);
+            transition: opacity .8s var(--ease), transform .8s var(--ease);
+            will-change: opacity, transform;
+        }
+        [data-reveal="left"]  { transform: translateX(-40px); }
+        [data-reveal="right"] { transform: translateX(40px); }
+        [data-reveal="scale"] { transform: scale(.94); }
+        [data-reveal].in {
+            opacity: 1;
+            transform: translateY(0) translateX(0) scale(1);
+        }
+
+        /* ---- Count-up tabular figures ---- */
+        .tnum { font-variant-numeric: tabular-nums; }
+
+        /* ---- WhatsApp pulse ---- */
+        .wa::after {
+            content: ''; position: absolute; inset: 0; border-radius: 9999px;
+            box-shadow: 0 0 0 0 rgba(34,197,94,.6); animation: wapulse 2.4s infinite;
+        }
+        @keyframes wapulse { 70%{ box-shadow: 0 0 0 16px rgba(34,197,94,0) } 100%{ box-shadow: 0 0 0 0 rgba(34,197,94,0) } }
+
+        /* ---- Reduced motion: disable all the things ---- */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: .001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .001ms !important;
+            }
+            [data-reveal] { opacity: 1 !important; transform: none !important; }
+            .floaty, .nudge, .wa::after { animation: none !important; }
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <!-- Skip link (a11y) -->
+    <a href="#hero" class="skip-link">Pular para o conteúdo</a>
+
+    <!-- ============ NAVBAR ============ -->
+    <nav id="navbar" class="fixed inset-x-0 top-0 z-50 py-5">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <a href="#hero" class="flex items-center gap-3 group" aria-label="Akamine e Associados — início">
+                    <span class="grid place-items-center w-11 h-11 rounded-xl bg-gradient-to-br from-ink-800 to-ink-950 ring-1 ring-gold-400/40 shadow-lg transition-transform duration-500 group-hover:rotate-[8deg]">
+                        <i data-lucide="scale" class="w-6 h-6 text-gold-300"></i>
+                    </span>
+                    <span class="flex flex-col leading-none">
+                        <span class="nav-logo-title text-white font-display text-xl font-semibold tracking-tight transition-colors">Akamine <span class="text-gradient-gold">&amp;</span> Associados</span>
+                        <span class="nav-logo-sub text-white/60 text-[10px] uppercase tracking-[0.32em] mt-1 transition-colors">Advocacia</span>
+                    </span>
+                </a>
+
+                <!-- Desktop nav -->
+                <div class="hidden md:flex items-center gap-9">
+                    <a href="#areas"        class="nav-link nav-underline text-white/85 text-sm font-medium tracking-wide transition-colors">Áreas de Atuação</a>
+                    <a href="#diferenciais" class="nav-link nav-underline text-white/85 text-sm font-medium tracking-wide transition-colors">Diferenciais</a>
+                    <a href="#depoimentos"  class="nav-link nav-underline text-white/85 text-sm font-medium tracking-wide transition-colors">Depoimentos</a>
+                    <a href="#contato"      class="btn btn-gold px-6 py-2.5 rounded-full text-sm font-semibold tracking-wide shadow-md">Consulta Grátis</a>
+                </div>
+
+                <!-- Mobile burger -->
+                <button id="burger" class="md:hidden p-2 -mr-2" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
+                    <span class="nav-burger" aria-hidden="true"><span></span><span></span><span></span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile drawer + backdrop -->
+    <div id="drawer-backdrop" class="drawer-backdrop fixed inset-0 z-40 bg-ink-950/60 md:hidden" hidden></div>
+    <aside id="drawer" class="drawer fixed top-0 right-0 z-50 h-full w-[82%] max-w-sm bg-white shadow-2xl md:hidden" role="dialog" aria-modal="true" aria-label="Menu de navegação">
+        <div class="flex items-center justify-between px-6 py-6 border-b border-ink-100">
+            <span class="font-display text-lg font-semibold text-ink-900">Navegação</span>
+            <button id="drawer-close" class="grid place-items-center w-10 h-10 rounded-full text-ink-700 hover:bg-ink-50 transition-colors" aria-label="Fechar menu">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <nav class="flex flex-col px-6 py-4">
+            <a href="#areas"        class="drawer-link py-4 text-ink-800 font-medium text-lg border-b border-ink-100 flex items-center justify-between">Áreas de Atuação <i data-lucide="arrow-up-right" class="w-4 h-4 text-gold-500"></i></a>
+            <a href="#diferenciais" class="drawer-link py-4 text-ink-800 font-medium text-lg border-b border-ink-100 flex items-center justify-between">Diferenciais <i data-lucide="arrow-up-right" class="w-4 h-4 text-gold-500"></i></a>
+            <a href="#depoimentos"  class="drawer-link py-4 text-ink-800 font-medium text-lg border-b border-ink-100 flex items-center justify-between">Depoimentos <i data-lucide="arrow-up-right" class="w-4 h-4 text-gold-500"></i></a>
+            <a href="#contato"      class="drawer-link mt-6 btn btn-gold text-center px-6 py-4 rounded-full font-semibold">Agende sua Consulta Grátis</a>
+        </nav>
+        <div class="absolute bottom-0 inset-x-0 px-6 py-6 border-t border-ink-100 text-sm text-ink-500">
+            <p class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4 text-gold-500"></i> (11) 4033-2045</p>
+            <p class="flex items-center gap-2 mt-2"><i data-lucide="map-pin" class="w-4 h-4 text-gold-500"></i> Bragança Paulista · SP</p>
+        </div>
+    </aside>
+
+    <!-- ============ HERO ============ -->
+    <header id="hero" class="relative min-h-[100svh] flex items-center overflow-hidden">
+        <!-- Parallax photo + overlays -->
+        <div id="hero-photo" class="hero-photo absolute inset-0 scale-110"></div>
+        <div class="hero-overlay absolute inset-0"></div>
+        <div class="grain absolute inset-0 opacity-60"></div>
+
+        <!-- Ambient rings -->
+        <div class="floaty absolute top-[18%] left-[6%] w-40 h-40 rounded-full border border-white/10" style="animation-delay:0s"></div>
+        <div class="floaty absolute bottom-[20%] right-[10%] w-56 h-56 rounded-full border border-gold-400/20" style="animation-delay:2.5s"></div>
+        <div class="floaty absolute top-[30%] right-[26%] w-24 h-24 rounded-full bg-gold-400/5 blur-xl" style="animation-delay:1.2s"></div>
+
+        <div class="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 py-32">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                <!-- Copy -->
+                <div class="lg:col-span-7">
+                    <div class="flex items-center gap-3 mb-7" data-reveal>
+                        <span class="rule"></span>
+                        <span class="text-gold-300 text-xs sm:text-sm uppercase tracking-[0.32em] font-semibold">Bragança Paulista · SP</span>
+                    </div>
+
+                    <h1 class="fluid-display font-display font-semibold text-white mb-6" data-reveal style="transition-delay:.06s">
+                        Excelência em <span class="text-gradient-gold italic">Direito</span><br>
+                        e Assessoria Jurídica
+                    </h1>
+
+                    <p class="fluid-lead text-white/75 leading-relaxed max-w-xl mb-9" data-reveal style="transition-delay:.12s">
+                        Há mais de 15 anos defendendo seus direitos com ética, técnica apurada e resultados consistentes. Sua tranquilidade é a nossa maior conquista.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-4" data-reveal style="transition-delay:.18s">
+                        <a href="#contato" class="btn btn-gold inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold tracking-wide">
+                            <i data-lucide="calendar-check" class="w-5 h-5"></i> Agende sua Consulta
+                        </a>
+                        <a href="#areas" class="btn btn-ghost glass inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-semibold tracking-wide">
+                            <i data-lucide="compass" class="w-5 h-5"></i> Nossas Áreas
+                        </a>
+                    </div>
+
+                    <div class="mt-12 flex items-center gap-6" data-reveal style="transition-delay:.24s">
+                        <div class="flex -space-x-3">
+                            <img loading="lazy" decoding="async" width="48" height="48" src="https://images.pexels.com/photos/2381069/pexels-photo-2381069.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&fit=crop" alt="Advogada da equipe" class="w-12 h-12 rounded-full border-2 border-ink-950 object-cover">
+                            <img loading="lazy" decoding="async" width="48" height="48" src="https://images.pexels.com/photos/5668772/pexels-photo-5668772.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&fit=crop" alt="Advogado da equipe" class="w-12 h-12 rounded-full border-2 border-ink-950 object-cover">
+                            <img loading="lazy" decoding="async" width="48" height="48" src="https://images.pexels.com/photos/3760069/pexels-photo-3760069.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&fit=crop" alt="Advogada da equipe" class="w-12 h-12 rounded-full border-2 border-ink-950 object-cover">
+                        </div>
+                        <div>
+                            <p class="text-white font-semibold text-lg tnum">+2.500</p>
+                            <p class="text-white/60 text-sm">Casos conduzidos com êxito</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual -->
+                <div class="hidden lg:block lg:col-span-5" data-reveal="right" style="transition-delay:.18s">
+                    <div class="relative">
+                        <div class="absolute -inset-5 rounded-[2rem] bg-gradient-to-br from-gold-400/25 to-ink-500/20 blur-2xl"></div>
+                        <figure class="img-zoom relative rounded-3xl overflow-hidden shadow-lift ring-1 ring-white/10">
+                            <img loading="lazy" decoding="async" width="800" height="560"
+                                 src="https://images.pexels.com/photos/5669602/pexels-photo-5669602.jpeg?auto=compress&cs=tinysrgb&w=900"
+                                 alt="Ambiente profissional do escritório Akamine & Associados em Bragança Paulista"
+                                 class="w-full h-[540px] object-cover">
+                            <figcaption class="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-ink-950/95 via-ink-950/40 to-transparent">
+                                <blockquote class="font-display italic text-white text-xl leading-snug">“A justiça é a constante e perpétua vontade de dar a cada um o que é seu.”</blockquote>
+                                <p class="text-gold-300 text-sm mt-3 tracking-wide">— Ulpiano</p>
+                            </figcaption>
+                        </figure>
+                        <!-- Floating glass badge -->
+                        <div class="glass-light absolute -left-6 top-10 rounded-2xl px-5 py-4 shadow-soft floaty" style="animation-delay:1.6s">
+                            <div class="flex items-center gap-3">
+                                <span class="grid place-items-center w-11 h-11 rounded-xl bg-gradient-to-br from-gold-300 to-gold-600 text-ink-950"><i data-lucide="shield-check" class="w-6 h-6"></i></span>
+                                <div>
+                                    <p class="font-display font-semibold text-ink-900 leading-none">OAB/SP</p>
+                                    <p class="text-ink-500 text-xs mt-1">Inscrição regular</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll cue -->
+        <a href="#stats" class="absolute bottom-7 left-1/2 -translate-x-1/2 text-white/55 hover:text-white transition-colors nudge" aria-label="Rolar para baixo">
+            <i data-lucide="chevron-down" class="w-7 h-7"></i>
+        </a>
+    </header>
+
+    <main>
+    <!-- ============ STATS ============ -->
+    <section id="stats" class="relative bg-white py-16 sm:py-20">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                <div class="text-center p-6 rounded-2xl hover:bg-ink-50/70 transition-colors duration-500" data-reveal>
+                    <p class="fluid-h2 font-display font-semibold text-gradient-gold tnum mb-1" data-count="15" data-suffix="+">0</p>
+                    <p class="text-ink-500 text-sm uppercase tracking-[0.18em]">Anos de Experiência</p>
+                </div>
+                <div class="text-center p-6 rounded-2xl hover:bg-ink-50/70 transition-colors duration-500" data-reveal style="transition-delay:.08s">
+                    <p class="fluid-h2 font-display font-semibold text-gradient-gold tnum mb-1" data-count="2500" data-suffix="+">0</p>
+                    <p class="text-ink-500 text-sm uppercase tracking-[0.18em]">Casos Resolvidos</p>
+                </div>
+                <div class="text-center p-6 rounded-2xl hover:bg-ink-50/70 transition-colors duration-500" data-reveal style="transition-delay:.16s">
+                    <p class="fluid-h2 font-display font-semibold text-gradient-gold tnum mb-1" data-count="98" data-suffix="%">0</p>
+                    <p class="text-ink-500 text-sm uppercase tracking-[0.18em]">Taxa de Sucesso</p>
+                </div>
+                <div class="text-center p-6 rounded-2xl hover:bg-ink-50/70 transition-colors duration-500" data-reveal style="transition-delay:.24s">
+                    <p class="fluid-h2 font-display font-semibold text-gradient-gold tnum mb-1" data-count="500" data-suffix="+">0</p>
+                    <p class="text-ink-500 text-sm uppercase tracking-[0.18em]">Clientes Atendidos</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ ÁREAS ============ -->
+    <section id="areas" class="relative py-24 sm:py-28 bg-[#fbfaf7]">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16" data-reveal>
+                <div class="flex items-center justify-center gap-3 mb-4">
+                    <span class="rule"></span>
+                    <span class="text-gold-600 text-xs sm:text-sm uppercase tracking-[0.3em] font-semibold">Nossa Expertise</span>
+                    <span class="rule"></span>
+                </div>
+                <h2 class="fluid-h2 font-display font-semibold text-ink-900 mb-4">Áreas de Atuação</h2>
+                <p class="fluid-lead text-ink-500 leading-relaxed">Soluções jurídicas personalizadas, conduzidas com profundidade técnica e atenção a cada detalhe do seu caso.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-7">
+                <!-- Cards -->
+                <article class="card bg-white rounded-2xl p-8 shadow-soft border border-ink-100" data-reveal>
+                    <span class="card-icon grid place-items-center w-14 h-14 rounded-xl bg-ink-50 text-ink-700 mb-6"><i data-lucide="file-text" class="w-7 h-7"></i></span>
+                    <h3 class="font-display text-2xl font-semibold text-ink-900 mb-3">Direito Cível</h3>
+                    <p class="text-ink-500 leading-relaxed mb-5">Contratos, responsabilidade civil, obrigações, família e sucessões — com defesa firme e técnica dos seus interesses.</p>
+                    <ul class="space-y-2 text-sm text-ink-600">
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Ações de indenização</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Contratos e obrigações</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Família e sucessões</li>
+                    </ul>
+                </article>
+
+                <article class="card bg-white rounded-2xl p-8 shadow-soft border border-ink-100" data-reveal style="transition-delay:.08s">
+                    <span class="card-icon grid place-items-center w-14 h-14 rounded-xl bg-ink-50 text-ink-700 mb-6"><i data-lucide="briefcase" class="w-7 h-7"></i></span>
+                    <h3 class="font-display text-2xl font-semibold text-ink-900 mb-3">Direito Trabalhista</h3>
+                    <p class="text-ink-500 leading-relaxed mb-5">Reclamações trabalhistas, defesa de empresas, acordos coletivos e assessoria preventiva na relação de trabalho.</p>
+                    <ul class="space-y-2 text-sm text-ink-600">
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Reclamações trabalhistas</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Defesa de empresas</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Assessoria preventiva</li>
+                    </ul>
+                </article>
+
+                <article class="card bg-white rounded-2xl p-8 shadow-soft border border-ink-100" data-reveal style="transition-delay:.16s">
+                    <span class="card-icon grid place-items-center w-14 h-14 rounded-xl bg-ink-50 text-ink-700 mb-6"><i data-lucide="building-2" class="w-7 h-7"></i></span>
+                    <h3 class="font-display text-2xl font-semibold text-ink-900 mb-3">Direito Empresarial</h3>
+                    <p class="text-ink-500 leading-relaxed mb-5">Consultoria societária, contratos comerciais, fusões e aquisições e governança corporativa para o seu negócio.</p>
+                    <ul class="space-y-2 text-sm text-ink-600">
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Constituição de empresas</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Contratos comerciais</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Fusões e aquisições</li>
+                    </ul>
+                </article>
+
+                <article class="card bg-white rounded-2xl p-8 shadow-soft border border-ink-100" data-reveal>
+                    <span class="card-icon grid place-items-center w-14 h-14 rounded-xl bg-ink-50 text-ink-700 mb-6"><i data-lucide="shield-check" class="w-7 h-7"></i></span>
+                    <h3 class="font-display text-2xl font-semibold text-ink-900 mb-3">Direito Previdenciário</h3>
+                    <p class="text-ink-500 leading-relaxed mb-5">Aposentadorias, auxílios, revisão de benefícios e ações contra o INSS com segurança jurídica.</p>
+                    <ul class="space-y-2 text-sm text-ink-600">
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Aposentadorias</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Auxílio-doença e invalidez</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Revisão de benefícios</li>
+                    </ul>
+                </article>
+
+                <article class="card bg-white rounded-2xl p-8 shadow-soft border border-ink-100" data-reveal style="transition-delay:.08s">
+                    <span class="card-icon grid place-items-center w-14 h-14 rounded-xl bg-ink-50 text-ink-700 mb-6"><i data-lucide="calculator" class="w-7 h-7"></i></span>
+                    <h3 class="font-display text-2xl font-semibold text-ink-900 mb-3">Direito Tributário</h3>
+                    <p class="text-ink-500 leading-relaxed mb-5">Planejamento tributário, defesa em fiscalizações, recuperação de créditos e redução legal da carga tributária.</p>
+                    <ul class="space-y-2 text-sm text-ink-600">
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Planejamento tributário</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Defesa administrativa</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Recuperação de créditos</li>
+                    </ul>
+                </article>
+
+                <article class="card bg-white rounded-2xl p-8 shadow-soft border border-ink-100" data-reveal style="transition-delay:.16s">
+                    <span class="card-icon grid place-items-center w-14 h-14 rounded-xl bg-ink-50 text-ink-700 mb-6"><i data-lucide="users" class="w-7 h-7"></i></span>
+                    <h3 class="font-display text-2xl font-semibold text-ink-900 mb-3">Assessoria Jurídica</h3>
+                    <p class="text-ink-500 leading-relaxed mb-5">Acompanhamento preventivo e contínuo para pessoas físicas e jurídicas, antecipando riscos e protegendo interesses.</p>
+                    <ul class="space-y-2 text-sm text-ink-600">
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Consultoria preventiva</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Análise de contratos</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-gold-600"></i> Auditoria jurídica</li>
+                    </ul>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ DIFERENCIAIS ============ -->
+    <section id="diferenciais" class="relative py-24 sm:py-28 bg-white overflow-hidden">
+        <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-ink-50/60 to-transparent pointer-events-none"></div>
+
+        <div class="relative max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="flex items-center gap-3 mb-4" data-reveal>
+                        <span class="rule"></span>
+                        <span class="text-gold-600 text-xs sm:text-sm uppercase tracking-[0.3em] font-semibold">Por que nos escolher</span>
+                    </div>
+                    <h2 class="fluid-h2 font-display font-semibold text-ink-900 mb-6" data-reveal style="transition-delay:.06s">Diferenciais que constroem <span class="text-gradient-gold italic">confiança</span></h2>
+                    <p class="fluid-lead text-ink-500 leading-relaxed mb-10" data-reveal style="transition-delay:.12s">
+                        No Akamine &amp; Associados, cada caso recebe a atenção que merece. Unimos experiência sólida a uma abordagem humanizada, priorizando soluções eficientes e a tranquilidade de quem confia em nós.
+                    </p>
+
+                    <div class="space-y-7">
+                        <div class="group flex items-start gap-5" data-reveal="left">
+                            <span class="feat-icon grid place-items-center w-12 h-12 rounded-xl bg-ink-50 text-ink-700 flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-gold-300 group-hover:to-gold-600 group-hover:text-ink-950"><i data-lucide="award" class="w-6 h-6"></i></span>
+                            <div>
+                                <h3 class="font-display text-xl font-semibold text-ink-900 mb-1">Excelência comprovada</h3>
+                                <p class="text-ink-500 leading-relaxed">Mais de 15 anos de atuação com resultados consistentes e reconhecidos pela comunidade jurídica de Bragança Paulista.</p>
+                            </div>
+                        </div>
+                        <div class="group flex items-start gap-5" data-reveal="left" style="transition-delay:.08s">
+                            <span class="feat-icon grid place-items-center w-12 h-12 rounded-xl bg-ink-50 text-ink-700 flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-gold-300 group-hover:to-gold-600 group-hover:text-ink-950"><i data-lucide="heart-handshake" class="w-6 h-6"></i></span>
+                            <div>
+                                <h3 class="font-display text-xl font-semibold text-ink-900 mb-1">Atendimento humanizado</h3>
+                                <p class="text-ink-500 leading-relaxed">Escuta ativa, comunicação transparente e acompanhamento próximo em todas as fases do processo.</p>
+                            </div>
+                        </div>
+                        <div class="group flex items-start gap-5" data-reveal="left" style="transition-delay:.16s">
+                            <span class="feat-icon grid place-items-center w-12 h-12 rounded-xl bg-ink-50 text-ink-700 flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-gold-300 group-hover:to-gold-600 group-hover:text-ink-950"><i data-lucide="zap" class="w-6 h-6"></i></span>
+                            <div>
+                                <h3 class="font-display text-xl font-semibold text-ink-900 mb-1">Agilidade e eficiência</h3>
+                                <p class="text-ink-500 leading-relaxed">Processos otimizados e tecnologia de ponta para resolver sua demanda no menor tempo possível, sem perder a qualidade.</p>
+                            </div>
+                        </div>
+                        <div class="group flex items-start gap-5" data-reveal="left" style="transition-delay:.24s">
+                            <span class="feat-icon grid place-items-center w-12 h-12 rounded-xl bg-ink-50 text-ink-700 flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-gold-300 group-hover:to-gold-600 group-hover:text-ink-950"><i data-lucide="lock" class="w-6 h-6"></i></span>
+                            <div>
+                                <h3 class="font-display text-xl font-semibold text-ink-900 mb-1">Sigilo absoluto</h3>
+                                <p class="text-ink-500 leading-relaxed">Compromisso inabalável com a confidencialidade. Suas informações estão seguras conosco, sempre.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-reveal="right">
+                    <div class="relative">
+                        <div class="absolute -inset-5 rounded-[2rem] bg-gradient-to-br from-ink-200/40 to-gold-200/40 blur-2xl"></div>
+                        <figure class="img-zoom relative rounded-3xl overflow-hidden shadow-lift">
+                            <img loading="lazy" decoding="async" width="800" height="640"
+                                 src="https://images.pexels.com/photos/8112199/pexels-photo-8112199.jpeg?auto=compress&cs=tinysrgb&w=900"
+                                 alt="Equipe de advogados em reunião de trabalho"
+                                 class="w-full h-[600px] object-cover">
+                        </figure>
+                        <div class="glass-light absolute -bottom-6 -left-6 rounded-2xl px-6 py-5 shadow-soft">
+                            <div class="flex items-center gap-4">
+                                <span class="grid place-items-center w-14 h-14 rounded-full bg-gradient-to-br from-ink-700 to-ink-950 text-gold-300"><i data-lucide="trophy" class="w-7 h-7"></i></span>
+                                <div>
+                                    <p class="font-display text-2xl font-semibold text-ink-900 leading-none">Top 3</p>
+                                    <p class="text-ink-500 text-sm mt-1">Escritórios da região</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ DEPOIMENTOS ============ -->
+    <section id="depoimentos" class="relative py-24 sm:py-28 bg-gradient-to-b from-[#fbfaf7] to-white">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16" data-reveal>
+                <div class="flex items-center justify-center gap-3 mb-4">
+                    <span class="rule"></span>
+                    <span class="text-gold-600 text-xs sm:text-sm uppercase tracking-[0.3em] font-semibold">Depoimentos</span>
+                    <span class="rule"></span>
+                </div>
+                <h2 class="fluid-h2 font-display font-semibold text-ink-900 mb-4">O que nossos clientes <span class="text-gradient-gold italic">dizem</span></h2>
+                <p class="fluid-lead text-ink-500 leading-relaxed">A confiança de quem contou conosco é o nosso maior reconhecimento.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-7">
+                <figure class="card relative bg-white rounded-2xl p-8 pt-10 shadow-soft border border-ink-100" data-reveal>
+                    <span class="absolute -top-5 left-8 grid place-items-center w-11 h-11 rounded-full bg-gradient-to-br from-gold-300 to-gold-600 text-ink-950 shadow-md"><i data-lucide="quote" class="w-5 h-5"></i></span>
+                    <div class="flex gap-1 mb-4" aria-label="Avaliação 5 de 5 estrelas">
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                    </div>
+                    <blockquote class="text-ink-600 leading-relaxed italic mb-6">“Foram fundamentais na resolução do meu caso trabalhista. A equipe foi extremamente atenciosa, me mantendo informada em cada etapa. Recomendo de olhos fechados!”</blockquote>
+                    <figcaption class="flex items-center gap-4">
+                        <img loading="lazy" decoding="async" width="48" height="48" src="https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&fit=crop" alt="Ana Carolina Mendes" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <p class="font-display font-semibold text-ink-900">Ana Carolina Mendes</p>
+                            <p class="text-ink-400 text-sm">Professora · Bragança Paulista</p>
+                        </div>
+                    </figcaption>
+                </figure>
+
+                <figure class="card relative bg-white rounded-2xl p-8 pt-10 shadow-soft border border-ink-100" data-reveal style="transition-delay:.1s">
+                    <span class="absolute -top-5 left-8 grid place-items-center w-11 h-11 rounded-full bg-gradient-to-br from-gold-300 to-gold-600 text-ink-950 shadow-md"><i data-lucide="quote" class="w-5 h-5"></i></span>
+                    <div class="flex gap-1 mb-4" aria-label="Avaliação 5 de 5 estrelas">
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                    </div>
+                    <blockquote class="text-ink-600 leading-relaxed italic mb-6">“Profissionais excelentes! Resolveram uma questão empresarial complexa que outros escritórios não conseguiram. A dedicação e o conhecimento fazem toda a diferença.”</blockquote>
+                    <figcaption class="flex items-center gap-4">
+                        <img loading="lazy" decoding="async" width="48" height="48" src="https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&fit=crop" alt="Roberto Ferreira" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <p class="font-display font-semibold text-ink-900">Roberto Ferreira</p>
+                            <p class="text-ink-400 text-sm">Empresário · Atibaia</p>
+                        </div>
+                    </figcaption>
+                </figure>
+
+                <figure class="card relative bg-white rounded-2xl p-8 pt-10 shadow-soft border border-ink-100" data-reveal style="transition-delay:.2s">
+                    <span class="absolute -top-5 left-8 grid place-items-center w-11 h-11 rounded-full bg-gradient-to-br from-gold-300 to-gold-600 text-ink-950 shadow-md"><i data-lucide="quote" class="w-5 h-5"></i></span>
+                    <div class="flex gap-1 mb-4" aria-label="Avaliação 5 de 5 estrelas">
+                        <i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i><i data-lucide="star" class="w-4 h-4 text-gold-500 fill-gold-500"></i>
+                    </div>
+                    <blockquote class="text-ink-600 leading-relaxed italic mb-6">“Consegui minha aposentadoria graças ao trabalho incansável do escritório. Cuidaram de tudo com competência e me deram tranquilidade durante todo o processo.”</blockquote>
+                    <figcaption class="flex items-center gap-4">
+                        <img loading="lazy" decoding="async" width="48" height="48" src="https://images.pexels.com/photos/762020/pexels-photo-762020.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&fit=crop" alt="Maria Helena Souza" class="w-12 h-12 rounded-full object-cover">
+                        <div>
+                            <p class="font-display font-semibold text-ink-900">Maria Helena Souza</p>
+                            <p class="text-ink-400 text-sm">Aposentada · Bragança Paulista</p>
+                        </div>
+                    </figcaption>
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CONTATO ============ -->
+    <section id="contato" class="relative py-24 sm:py-28 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-ink-800 via-ink-900 to-ink-950"></div>
+        <div class="absolute inset-0 opacity-[0.08] bg-cover bg-center" style="background-image:url('https://images.pexels.com/photos/5668858/pexels-photo-5668858.jpeg?auto=compress&cs=tinysrgb&w=1600')"></div>
+        <div class="grain absolute inset-0 opacity-50"></div>
+        <div class="floaty absolute top-16 left-12 w-56 h-56 rounded-full border border-white/10"></div>
+        <div class="floaty absolute bottom-16 right-12 w-44 h-44 rounded-full border border-gold-400/20" style="animation-delay:3s"></div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="grid lg:grid-cols-2 gap-14 items-center">
+                <div>
+                    <div class="flex items-center gap-3 mb-4" data-reveal>
+                        <span class="rule"></span>
+                        <span class="text-gold-300 text-xs sm:text-sm uppercase tracking-[0.3em] font-semibold">Entre em contato</span>
+                    </div>
+                    <h2 class="fluid-h2 font-display font-semibold text-white mb-6" data-reveal style="transition-delay:.06s">Consulta inicial <span class="text-gradient-gold italic">gratuita</span></h2>
+                    <p class="fluid-lead text-white/75 leading-relaxed mb-10" data-reveal style="transition-delay:.12s">
+                        Tire suas dúvidas sem compromisso. Analisamos o seu caso e apresentamos as melhores soluções jurídicas para você ou sua empresa.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4" data-reveal style="transition-delay:.16s">
+                            <span class="glass grid place-items-center w-12 h-12 rounded-xl text-gold-300 flex-shrink-0"><i data-lucide="map-pin" class="w-6 h-6"></i></span>
+                            <div>
+                                <p class="text-white font-semibold">Endereço</p>
+                                <p class="text-white/65">Av. Cel. Octaviano Pereira, 456 · Centro</p>
+                                <p class="text-white/65">Bragança Paulista · SP · CEP 12900-000</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4" data-reveal style="transition-delay:.2s">
+                            <span class="glass grid place-items-center w-12 h-12 rounded-xl text-gold-300 flex-shrink-0"><i data-lucide="phone" class="w-6 h-6"></i></span>
+                            <div>
+                                <p class="text-white font-semibold">Telefone</p>
+                                <p class="text-white/65">(11) 4033-2045</p>
+                                <p class="text-white/65">(11) 9 8765-4321 · WhatsApp</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4" data-reveal style="transition-delay:.24s">
+                            <span class="glass grid place-items-center w-12 h-12 rounded-xl text-gold-300 flex-shrink-0"><i data-lucide="mail" class="w-6 h-6"></i></span>
+                            <div>
+                                <p class="text-white font-semibold">E-mail</p>
+                                <p class="text-white/65">contato@akamineadvogados.com.br</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4" data-reveal style="transition-delay:.28s">
+                            <span class="glass grid place-items-center w-12 h-12 rounded-xl text-gold-300 flex-shrink-0"><i data-lucide="clock" class="w-6 h-6"></i></span>
+                            <div>
+                                <p class="text-white font-semibold">Horário de atendimento</p>
+                                <p class="text-white/65">Segunda a sexta · 9h às 18h</p>
+                                <p class="text-white/65">Sábado · 9h às 12h (com agendamento)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-reveal="scale" style="transition-delay:.1s">
+                    <form id="contact-form" novalidate class="glass rounded-3xl p-8 shadow-lift">
+                        <h3 class="font-display text-2xl font-semibold text-white mb-6">Agende sua consulta</h3>
+                        <div class="space-y-5">
+                            <div>
+                                <label for="f-nome" class="block text-white/80 text-sm font-medium mb-2">Nome completo</label>
+                                <input id="f-nome" name="nome" type="text" required autocomplete="name"
+                                       class="field w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/45"
+                                       placeholder="Digite seu nome">
+                            </div>
+                            <div class="grid sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="f-email" class="block text-white/80 text-sm font-medium mb-2">E-mail</label>
+                                    <input id="f-email" name="email" type="email" required autocomplete="email"
+                                           class="field w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/45"
+                                           placeholder="seu@email.com">
+                                </div>
+                                <div>
+                                    <label for="f-tel" class="block text-white/80 text-sm font-medium mb-2">Telefone</label>
+                                    <input id="f-tel" name="telefone" type="tel" autocomplete="tel"
+                                           class="field w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/45"
+                                           placeholder="(11) 9 0000-0000">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="f-area" class="block text-white/80 text-sm font-medium mb-2">Área de interesse</label>
+                                <select id="f-area" name="area" class="field w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white">
+                                    <option value="" class="text-ink-900">Selecione uma área</option>
+                                    <option value="civel" class="text-ink-900">Direito Cível</option>
+                                    <option value="trabalhista" class="text-ink-900">Direito Trabalhista</option>
+                                    <option value="empresarial" class="text-ink-900">Direito Empresarial</option>
+                                    <option value="previdenciario" class="text-ink-900">Direito Previdenciário</option>
+                                    <option value="tributario" class="text-ink-900">Direito Tributário</option>
+                                    <option value="assessoria" class="text-ink-900">Assessoria Jurídica</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="f-msg" class="block text-white/80 text-sm font-medium mb-2">Mensagem</label>
+                                <textarea id="f-msg" name="mensagem" rows="4"
+                                          class="field w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/45 resize-none"
+                                          placeholder="Descreva brevemente sua demanda..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-gold w-full py-4 rounded-xl font-semibold uppercase tracking-wide inline-flex items-center justify-center gap-2">
+                                <i data-lucide="send" class="w-5 h-5"></i> Enviar solicitação
+                            </button>
+                            <p id="form-status" role="status" aria-live="polite" class="text-white/55 text-xs text-center">Responderemos em até 24 horas úteis. Seus dados estão seguros e protegidos.</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="bg-ink-950 text-white py-16">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="grid place-items-center w-11 h-11 rounded-xl bg-gradient-to-br from-ink-700 to-ink-950 ring-1 ring-gold-400/40"><i data-lucide="scale" class="w-6 h-6 text-gold-300"></i></span>
+                        <span class="flex flex-col leading-none">
+                            <span class="font-display text-xl font-semibold">Akamine <span class="text-gradient-gold">&amp;</span> Associados</span>
+                            <span class="text-white/45 text-[10px] uppercase tracking-[0.3em] mt-1">Advocacia e Assessoria Jurídica</span>
+                        </span>
+                    </div>
+                    <p class="text-white/55 leading-relaxed max-w-md mb-6">
+                        Há mais de 15 anos oferecendo serviços jurídicos de excelência em Bragança Paulista e região. Nosso compromisso é com a justiça, a ética e os resultados de nossos clientes.
+                    </p>
+                    <div class="flex gap-3">
+                        <a href="#" aria-label="Facebook" class="grid place-items-center w-10 h-10 rounded-full bg-white/10 hover:bg-gold-500 hover:text-ink-950 transition-colors"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                        <a href="#" aria-label="Instagram" class="grid place-items-center w-10 h-10 rounded-full bg-white/10 hover:bg-gold-500 hover:text-ink-950 transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                        <a href="#" aria-label="LinkedIn" class="grid place-items-center w-10 h-10 rounded-full bg-white/10 hover:bg-gold-500 hover:text-ink-950 transition-colors"><i data-lucide="linkedin" class="w-5 h-5"></i></a>
+                        <a href="https://wa.me/5511987654321" aria-label="WhatsApp" class="grid place-items-center w-10 h-10 rounded-full bg-white/10 hover:bg-gold-500 hover:text-ink-950 transition-colors"><i data-lucide="message-circle" class="w-5 h-5"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-display text-lg font-semibold mb-4 text-gold-300">Links rápidos</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#areas" class="text-white/55 hover:text-white transition-colors">Áreas de Atuação</a></li>
+                        <li><a href="#diferenciais" class="text-white/55 hover:text-white transition-colors">Diferenciais</a></li>
+                        <li><a href="#depoimentos" class="text-white/55 hover:text-white transition-colors">Depoimentos</a></li>
+                        <li><a href="#contato" class="text-white/55 hover:text-white transition-colors">Contato</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-display text-lg font-semibold mb-4 text-gold-300">Áreas de Atuação</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#areas" class="text-white/55 hover:text-white transition-colors">Direito Cível</a></li>
+                        <li><a href="#areas" class="text-white/55 hover:text-white transition-colors">Direito Trabalhista</a></li>
+                        <li><a href="#areas" class="text-white/55 hover:text-white transition-colors">Direito Empresarial</a></li>
+                        <li><a href="#areas" class="text-white/55 hover:text-white transition-colors">Direito Previdenciário</a></li>
+                        <li><a href="#areas" class="text-white/55 hover:text-white transition-colors">Direito Tributário</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-3">
+                <p class="text-white/40 text-sm">© 2026 Akamine &amp; Associados Advocacia. Todos os direitos reservados.</p>
+                <p class="text-white/40 text-xs">OAB/SP 123.456 · CNPJ 12.345.678/0001-90</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp float -->
+    <a href="https://wa.me/5511987654321" target="_blank" rel="noopener"
+       class="wa fixed bottom-6 right-6 z-40 grid place-items-center w-14 h-14 rounded-full bg-green-500 text-white shadow-lg transition-transform duration-300 hover:scale-110"
+       aria-label="Falar no WhatsApp">
+        <i data-lucide="message-circle" class="w-7 h-7 relative z-10"></i>
+    </a>
+
+    <!-- ============ SCRIPTS ============ -->
+    <script>
+    (function () {
+        'use strict';
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function init() {
+            if (window.lucide) lucide.createIcons();
+
+            /* ---- Navbar scroll state ---- */
+            var navbar = document.getElementById('navbar');
+            var onScroll = function () {
+                var scrolled = window.scrollY > 40;
+                navbar.classList.toggle('scrolled', scrolled);
+                navbar.classList.toggle('py-3', scrolled);
+                navbar.classList.toggle('py-5', !scrolled);
+            };
+            onScroll();
+            window.addEventListener('scroll', onScroll, { passive: true });
+
+            /* ---- Mobile drawer ---- */
+            var burger = document.getElementById('burger');
+            var burgerIcon = burger.querySelector('.nav-burger');
+            var drawer = document.getElementById('drawer');
+            var backdrop = document.getElementById('drawer-backdrop');
+
+            function openDrawer() {
+                backdrop.hidden = false;
+                requestAnimationFrame(function () {
+                    drawer.classList.add('open');
+                    backdrop.classList.add('open');
+                });
+                burgerIcon.classList.add('is-open');
+                burger.setAttribute('aria-expanded', 'true');
+                burger.setAttribute('aria-label', 'Fechar menu');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeDrawer() {
+                drawer.classList.remove('open');
+                backdrop.classList.remove('open');
+                burgerIcon.classList.remove('is-open');
+                burger.setAttribute('aria-expanded', 'false');
+                burger.setAttribute('aria-label', 'Abrir menu');
+                document.body.style.overflow = '';
+                setTimeout(function () { backdrop.hidden = true; }, 450);
+            }
+            burger.addEventListener('click', function () {
+                drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+            });
+            document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+            backdrop.addEventListener('click', closeDrawer);
+            drawer.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', closeDrawer); });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+            });
+
+            /* ---- Scroll reveal (IntersectionObserver) ---- */
+            var revealEls = document.querySelectorAll('[data-reveal]');
+            if (reduceMotion || !('IntersectionObserver' in window)) {
+                revealEls.forEach(function (el) { el.classList.add('in'); });
+            } else {
+                var io = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('in');
+                            io.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+                revealEls.forEach(function (el) { io.observe(el); });
+            }
+
+            /* ---- Count-up stats ---- */
+            var counters = document.querySelectorAll('[data-count]');
+            function runCount(el) {
+                var target = parseFloat(el.getAttribute('data-count'));
+                var suffix = el.getAttribute('data-suffix') || '';
+                if (reduceMotion) { el.textContent = target.toLocaleString('pt-BR') + suffix; return; }
+                var start = null, dur = 1600;
+                function step(ts) {
+                    if (!start) start = ts;
+                    var p = Math.min((ts - start) / dur, 1);
+                    var eased = 1 - Math.pow(1 - p, 3);
+                    var val = Math.round(target * eased);
+                    el.textContent = val.toLocaleString('pt-BR') + suffix;
+                    if (p < 1) requestAnimationFrame(step);
+                }
+                requestAnimationFrame(step);
+            }
+            if (!('IntersectionObserver' in window)) {
+                counters.forEach(runCount);
+            } else {
+                var cio = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) { runCount(entry.target); cio.unobserve(entry.target); }
+                    });
+                }, { threshold: 0.6 });
+                counters.forEach(function (el) { cio.observe(el); });
+            }
+
+            /* ---- Subtle hero parallax (GPU transform, rAF-throttled) ---- */
+            var heroPhoto = document.getElementById('hero-photo');
+            if (heroPhoto && !reduceMotion) {
+                var ticking = false;
+                window.addEventListener('scroll', function () {
+                    if (!ticking) {
+                        requestAnimationFrame(function () {
+                            var y = window.scrollY;
+                            if (y < window.innerHeight) {
+                                heroPhoto.style.transform = 'translate3d(0,' + (y * 0.18) + 'px,0) scale(1.1)';
+                            }
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                }, { passive: true });
+            }
+
+            /* ---- Form (demo handler) ---- */
+            var form = document.getElementById('contact-form');
+            var status = document.getElementById('form-status');
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (!form.checkValidity()) {
+                    status.textContent = 'Por favor, preencha nome e e-mail válidos.';
+                    status.classList.add('text-gold-300');
+                    form.reportValidity();
+                    return;
+                }
+                status.textContent = 'Obrigado! Sua solicitação foi registrada — entraremos em contato em breve.';
+                status.classList.add('text-gold-300');
+                form.reset();
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    </script>
+</body>
+</html>
