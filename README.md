@@ -248,4 +248,4 @@ Abra [http://localhost:3000](http://localhost:3000) no seu navegador para acessa
 
 ## 📄 Licença
 
-Projeto desenvolvido para uso corporativo na **EnviaGora**.
+Projeto desenvolvido para uso corporativo na **Enviagora**.
