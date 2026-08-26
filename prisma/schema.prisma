@@ -9,10 +9,51 @@ generator client {
 
 model AuditLog {
   id        String   @id @default(uuid())
+  eventId   String?  @unique // Identificador idempotente para evitar duplicações de Webhook
   sku       String
   erp       Int
   mkt       Int
   failure   String
   status    String
   createdAt DateTime @default(now())
+
+  @@index([sku])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model SecurityEvent {
+  id        String   @id @default(uuid())
+  event     String   // ex: AUTH_FAILED, RATE_LIMIT_EXCEEDED, INVALID_PAYLOAD, WEBHOOK_REPLAY, SHEETS_SYNC_FAILED, AI_REQUEST_REJECTED
+  route     String
+  ip        String
+  userAgent String?
+  details   String?
+  createdAt DateTime @default(now())
+
+  @@index([event, createdAt])
+}
+
+model FavoriteSku {
+  id        String   @id @default(uuid())
+  userId    String
+  sku       String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, sku])
+  @@index([userId])
+  @@index([sku])
+}
+
+model ExportedReport {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String   // ex: GENERAL_AUDIT, CRITICAL_ISSUES, SKU_HISTORY, EXECUTIVE_SUMMARY
+  title       String
+  filters     String?  // JSON stringificado com os filtros aplicados
+  recordCount Int
+  format      String   // ex: PDF, SHEETS, CSV
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
 }

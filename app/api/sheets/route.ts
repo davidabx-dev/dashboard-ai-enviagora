@@ -1,32 +1,109 @@
 // app/api/sheets/route.ts
-import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { prisma } from '../../../lib/prisma';
+import { validateAuth } from '../../../lib/auth';
+import {
+  checkRateLimit,
+  getClientIp,
+  getRateLimitHeaders,
+  acquireDistributedLock,
+  releaseDistributedLock,
+} from '../../../lib/rate-limit';
+import { apiError, apiSuccess } from '../../../lib/response';
+import { logSecurityEvent } from '../../../lib/security-logger';
 
-export async function POST() {
-  const { GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_SHEET_ID } = process.env;
+const SHEETS_LOCK_KEY = 'lock:google_sheets_sync';
 
-  // Trava de segurança: validação limpa das credenciais de infraestrutura
-  if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY || !GOOGLE_SHEET_ID) {
-    return NextResponse.json(
-      { success: false, error: 'Variáveis de ambiente do Google não configuradas.' },
-      { status: 500 }
+/**
+ * Executa uma operação com retries automáticos e Exponential Backoff para erros de quota (429)
+ */
+async function withExponentialBackoff<T>(fn: () => Promise<T>, maxRetries = 3, initialDelayMs = 1000): Promise<T> {
+  let delay = initialDelayMs;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: unknown) {
+      const isRateLimit =
+        error instanceof Error &&
+        (error.message.includes('429') ||
+          error.message.includes('quota') ||
+          error.message.includes('Rate Limit'));
+
+      if (isRateLimit && attempt < maxRetries) {
+        console.warn(`[GoogleSheets] Quota atingida. Tentativa ${attempt} de ${maxRetries}. Aguardando ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay *= 2; // Dobra o tempo a cada tentativa (Exponential Backoff)
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error('Falha após múltiplas tentativas com exponential backoff.');
+}
+
+export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const userAgent = request.headers.get('user-agent');
+
+  // 1. Verificação de Autenticação e RBAC (Requer OPERATOR ou superior)
+  const auth = validateAuth(request, { requiredRole: 'OPERATOR' });
+  if (!auth.authenticated) {
+    await logSecurityEvent({
+      event: 'AUTH_FAILED',
+      route: '/api/sheets',
+      ip,
+      userAgent,
+      details: auth.error,
+    });
+    return apiError(auth.error || 'Acesso não autorizado.', 401);
+  }
+
+  // 2. Verificação de Rate Limit (15 requisições por minuto)
+  const rateLimit = await checkRateLimit(request, 'sheets', { limit: 15, windowMs: 60_000 });
+  const rateLimitHeaders = getRateLimitHeaders(rateLimit);
+
+  if (!rateLimit.success) {
+    await logSecurityEvent({
+      event: 'RATE_LIMIT_EXCEEDED',
+      route: '/api/sheets',
+      ip,
+      userAgent,
+    });
+    return apiError(
+      'Limite de requisições para sincronização excedido. Aguarde antes de tentar novamente.',
+      429,
+      { headers: rateLimitHeaders }
     );
   }
 
+  // 3. Trava de Concorrência Distribuída (TTL 30s)
+  const { acquired, lockId } = await acquireDistributedLock(SHEETS_LOCK_KEY, 30);
+  if (!acquired) {
+    return apiError(
+      'Uma sincronização de planilha já está em andamento. Aguarde a conclusão.',
+      409,
+      { headers: rateLimitHeaders }
+    );
+  }
+
+  const { GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_SHEET_ID } = process.env;
+
+  if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY || !GOOGLE_SHEET_ID) {
+    await releaseDistributedLock(SHEETS_LOCK_KEY, lockId);
+    return apiError('Credenciais de integração do Google Sheets não configuradas no servidor.', 500, {
+      headers: rateLimitHeaders,
+    });
+  }
+
   try {
-    // Alinhamento preventivo: buscando os registros ativos salvos na tabela física do banco
     const logs = await prisma.auditLog.findMany({
-      orderBy: { id: 'desc' }, // Ordenação limpa pelo ID incremental de auditoria
-      take: 1000, // Proteção contra dumps massivos de memória
+      orderBy: { createdAt: 'desc' },
+      take: 1000,
     });
 
-    // CORREÇÃO CRÍTICA: Remove aspas duplas das extremidades e converte os \n textuais em quebras reais
-    const cleanPrivateKey = GOOGLE_PRIVATE_KEY
-      .replace(/^"|"$/g, '')
-      .replace(/\\n/g, '\n');
+    const cleanPrivateKey = GOOGLE_PRIVATE_KEY.replace(/^"|"$/g, '').replace(/\\n/g, '\n');
 
-    const auth = new google.auth.GoogleAuth({
+    const authClient = new google.auth.GoogleAuth({
       credentials: {
         client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
         private_key: cleanPrivateKey,
@@ -34,41 +111,64 @@ export async function POST() {
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
 
-    const sheets = google.sheets({ version: 'v4', auth });
+    const sheets = google.sheets({ version: 'v4', auth: authClient });
 
-    // Limpa o intervalo antigo para evitar linhas duplicadas no arquivo
-    await sheets.spreadsheets.values.clear({
-      spreadsheetId: GOOGLE_SHEET_ID,
-      range: 'Auditoria!A2:Z',
-    });
-
-    // Mapeia os dados do banco respeitando o modelo real do projeto
-    const rows = logs.map(log => [
-      log.sku, 
-      `${log.erp} un`, 
-      `${log.mkt} un`, 
-      log.failure, 
-      log.status
+    const rows = logs.map((log) => [
+      log.sku,
+      `${log.erp} un`,
+      `${log.mkt} un`,
+      log.failure,
+      log.status,
     ]);
 
-    // Insere o novo lote de dados atualizado
-    await sheets.spreadsheets.values.append({
-      spreadsheetId: GOOGLE_SHEET_ID,
-      range: 'Auditoria!A2',
-      valueInputOption: 'USER_ENTERED',
-      requestBody: { values: rows },
+    // Execução com Exponential Backoff contra erros de quota
+    await withExponentialBackoff(async () => {
+      await sheets.spreadsheets.values.clear({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        range: 'Auditoria!A2:Z',
+      });
+
+      if (rows.length > 0) {
+        await sheets.spreadsheets.values.append({
+          spreadsheetId: GOOGLE_SHEET_ID,
+          range: 'Auditoria!A2',
+          valueInputOption: 'USER_ENTERED',
+          requestBody: { values: rows },
+        });
+      }
     });
 
-    return NextResponse.json({ success: true, count: rows.length });
-  } catch (error: any) {
-    // CORREÇÃO VISUAL: Injeta a mensagem real diretamente na chave error para o Toast capturar na tela
-    console.error("Erro capturado na rota de planilhas:", error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: error.message || 'Falha na integração com o Google Sheets.' 
-      },
-      { status: 500 }
-    );
+    return apiSuccess({ count: rows.length }, { headers: rateLimitHeaders });
+  } catch (error: unknown) {
+    console.error('Erro na sincronização com Google Sheets:', error);
+
+    let errorMessage = 'Falha ao sincronizar dados com o Google Sheets.';
+    let statusCode = 500;
+
+    if (error instanceof Error) {
+      if (error.message.includes('403') || error.message.includes('permission')) {
+        errorMessage = 'Permissão negada. O e-mail da Service Account precisa de acesso de Editor na planilha.';
+        statusCode = 403;
+      } else if (error.message.includes('404') || error.message.includes('not found')) {
+        errorMessage = 'Planilha ou aba "Auditoria" não encontrada no Google Drive.';
+        statusCode = 404;
+      } else if (error.message.includes('429') || error.message.includes('quota')) {
+        errorMessage = 'Quota de requisições do Google Sheets atingida. Tente novamente em alguns minutos.';
+        statusCode = 429;
+      }
+    }
+
+    await logSecurityEvent({
+      event: 'SHEETS_SYNC_FAILED',
+      route: '/api/sheets',
+      ip,
+      userAgent,
+      details: errorMessage,
+    });
+
+    return apiError(errorMessage, statusCode, { headers: rateLimitHeaders });
+  } finally {
+    // Garante que o lock seja liberado independentemente de erro ou sucesso
+    await releaseDistributedLock(SHEETS_LOCK_KEY, lockId);
   }
 }
